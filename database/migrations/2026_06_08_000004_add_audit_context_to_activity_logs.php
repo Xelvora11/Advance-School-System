@@ -1,0 +1,23 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::table('activity_logs', function (Blueprint $table) {
+            $table->string('role')->nullable()->after('user_id')->index();
+            $table->string('ip_address', 45)->nullable()->after('description');
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::table('activity_logs', function (Blueprint $table) {
+            $table->dropColumn(['role', 'ip_address']);
+        });
+    }
+};
