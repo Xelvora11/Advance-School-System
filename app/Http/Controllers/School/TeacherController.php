@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\School;
 
 use App\Http\Controllers\Controller;
+use App\Models\AccountTransaction;
 use App\Models\SchoolClass;
 use App\Models\Section;
 use App\Models\Subject;
@@ -14,6 +15,7 @@ use App\Models\TeacherSalaryPaymentEntry;
 use App\Models\User;
 use App\Support\Activity;
 use App\Support\SchoolContext;
+use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -469,7 +471,7 @@ class TeacherController extends Controller
         DB::transaction(function () use ($salaryPayment, $validated) {
             $oldStatus = $salaryPayment->payment_status;
 
-            TeacherSalaryPaymentEntry::create([
+            $paymentEntry = TeacherSalaryPaymentEntry::create([
                 'school_id' => SchoolContext::id(),
                 'salary_record_id' => $salaryPayment->id,
                 'teacher_id' => $salaryPayment->teacher_id,
@@ -487,6 +489,20 @@ class TeacherController extends Controller
             }
             $salaryPayment->save();
             $this->logSalaryStatusChange($salaryPayment, $oldStatus);
+
+            $salaryPayment->loadMissing('teacher');
+            AccountTransaction::recordExpense(
+                SchoolContext::id(),
+                'Salaries',
+                'Salary paid to '.($salaryPayment->teacher?->name ?: 'teacher').' for '.Carbon::create((int) $salaryPayment->salary_year, (int) $salaryPayment->salary_month, 1)->format('F Y'),
+                (float) $validated['amount'],
+                $validated['payment_date'],
+                SchoolContext::user()->id,
+                $validated['note'] ?? null,
+                'Salary Payment',
+                TeacherSalaryPaymentEntry::class,
+                $paymentEntry->id,
+            );
         });
 
         Activity::log('teacher_salary_payment_recorded', 'Teacher salary payment recorded.', ['salary_id' => $salaryPayment->id]);

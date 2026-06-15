@@ -4,6 +4,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\School\AcademicsController;
+use App\Http\Controllers\School\AccountController;
 use App\Http\Controllers\School\AdmissionController;
 use App\Http\Controllers\School\AttendanceController;
 use App\Http\Controllers\School\ExamController;
@@ -177,6 +178,23 @@ Route::middleware(['auth', 'verified', 'school.active'])->group(function () {
         Route::post('/fees/{studentFee}/payments', [FeeController::class, 'payment'])->name('fees.payments.store');
         Route::get('/fees/payments/{payment}/receipt', [FeeController::class, 'receipt'])->name('fees.receipt');
         Route::get('/fees/{studentFee}/challan', [FeeController::class, 'challan'])->name('fees.challan');
+
+        Route::get('/accounts', [AccountController::class, 'index'])->name('accounts.index');
+        Route::get('/accounts/income', [AccountController::class, 'income'])->name('accounts.income');
+        Route::post('/accounts/income', [AccountController::class, 'storeIncome'])->name('accounts.income.store');
+        Route::get('/accounts/expenses', [AccountController::class, 'expenses'])->name('accounts.expenses');
+        Route::post('/accounts/expenses', [AccountController::class, 'storeExpense'])->name('accounts.expenses.store');
+        Route::get('/accounts/ledger', [AccountController::class, 'ledger'])->name('accounts.ledger');
+        Route::get('/accounts/cash-book', [AccountController::class, 'cashBook'])->name('accounts.cash-book');
+        Route::get('/accounts/reports/student-dues', [AccountController::class, 'studentDues'])->name('accounts.reports.student-dues');
+        Route::get('/accounts/reports/salary', [AccountController::class, 'salaryReport'])->name('accounts.reports.salary');
+        Route::get('/accounts/reports/summary', [AccountController::class, 'summary'])->name('accounts.reports.summary');
+        Route::get('/accounts/exports/income.csv', [AccountController::class, 'incomeCsv'])->name('accounts.exports.income');
+        Route::get('/accounts/exports/expenses.csv', [AccountController::class, 'expenseCsv'])->name('accounts.exports.expenses');
+        Route::get('/accounts/exports/ledger.csv', [AccountController::class, 'ledgerCsv'])->name('accounts.exports.ledger');
+        Route::get('/accounts/exports/student-dues.csv', [AccountController::class, 'studentDuesCsv'])->name('accounts.exports.student-dues');
+        Route::get('/accounts/exports/salary-report.csv', [AccountController::class, 'salaryReportCsv'])->name('accounts.exports.salary-report');
+        Route::get('/accounts/exports/summary.csv', [AccountController::class, 'summaryCsv'])->name('accounts.exports.summary');
 
         Route::get('/notices', [NoticeController::class, 'index'])->name('notices.index');
         Route::post('/notices', [NoticeController::class, 'store'])->name('notices.store');

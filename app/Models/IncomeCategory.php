@@ -1,0 +1,49 @@
+<?php
+
+namespace App\Models;
+
+use App\Models\Concerns\BelongsToSchool;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
+
+class IncomeCategory extends Model
+{
+    use BelongsToSchool;
+
+    public const DEFAULTS = [
+        'Tuition Fee',
+        'Admission Fee',
+        'Exam Fee',
+        'Transport Fee',
+        'Library Fee',
+        'Certificate Fee',
+        'Misc Income',
+        'Donation',
+        'Sponsorship',
+        'Other',
+    ];
+
+    protected $fillable = [
+        'school_id',
+        'name',
+        'slug',
+        'is_active',
+    ];
+
+    protected function casts(): array
+    {
+        return [
+            'is_active' => 'boolean',
+        ];
+    }
+
+    public static function ensureDefaultsForSchool(int $schoolId): void
+    {
+        foreach (self::DEFAULTS as $name) {
+            self::firstOrCreate(
+                ['school_id' => $schoolId, 'slug' => Str::slug($name)],
+                ['name' => $name, 'is_active' => true],
+            );
+        }
+    }
+}

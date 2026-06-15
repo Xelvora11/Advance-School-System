@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\School;
 
 use App\Http\Controllers\Controller;
+use App\Models\AccountTransaction;
 use App\Models\FeeHead;
 use App\Models\FeeStructure;
 use App\Models\Guardian;
@@ -810,6 +811,20 @@ class FeeController extends Controller
             $amount,
             $validated['paid_on'],
             SchoolContext::user()->id,
+        );
+
+        $studentFee->loadMissing(['student', 'feeHead']);
+        AccountTransaction::recordIncome(
+            SchoolContext::id(),
+            'Tuition Fee',
+            'Fee payment received from '.($studentFee->student?->name ?: 'student').' for '.($studentFee->feeHead?->name ?: 'fee').' ('.$payment->receipt_number.')',
+            $amount,
+            $validated['paid_on'],
+            SchoolContext::user()->id,
+            $validated['note'] ?? null,
+            'Fee Payment',
+            Payment::class,
+            $payment->id,
         );
 
         Activity::log('payment_marked', 'Payment received: '.$payment->receipt_number, ['payment_id' => $payment->id]);
